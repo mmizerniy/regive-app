@@ -1,0 +1,19 @@
+package mmdev.regiveapp.item;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+
+public interface ItemRepository extends JpaRepository<Item,Long> {
+
+    @Query("""
+            select i from Item i
+            where (:city is null or i.city = :city)
+              and (:categoryId is null or i.category.id = :categoryId)
+              and i.status = mmdev.regiveapp.item.ItemStatus.ACTIVE
+            order by i.createdAt desc
+            """)
+    List<Item> search(@Param("city") String city, @Param("categoryId") Long categoryId);
+}
