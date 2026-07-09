@@ -27,9 +27,19 @@ public class User {
     @Column(nullable = false,updatable = false)
     private Instant createdAt;
 
+    @Column(nullable = false)
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false,length = 20)
+    private Role role;
+
     @PrePersist
     void onCreate(){
         this.createdAt = Instant.now();
+        if (this.role==null){
+            this.role = Role.USER;
+        }
     }
 
 }

@@ -5,6 +5,7 @@ import mmdev.regiveapp.common.exception.ResourceNotFoundException;
 import mmdev.regiveapp.user.dto.CreateUserRequest;
 import mmdev.regiveapp.user.dto.UpdateUserRequest;
 import mmdev.regiveapp.user.dto.UserResponse;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,9 +16,11 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -28,6 +31,7 @@ public class UserService {
         User user = new User();
         user.setName(request.name());
         user.setEmail(request.email());
+        user.setPassword(passwordEncoder.encode(request.password()));
         return toResponse(userRepository.save(user));
     }
 

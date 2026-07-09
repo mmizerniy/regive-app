@@ -34,7 +34,7 @@ public class Item {
     private String city;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false,length = 20)
     private ItemStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -47,6 +47,10 @@ public class Item {
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
+
+    @Version
+    @Column(nullable = false)
+    private Long version;
 
     @PrePersist
     void onCreate() {

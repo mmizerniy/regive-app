@@ -11,7 +11,6 @@ public record CreateItemRequest (
         String description,
         @PositiveOrZero BigDecimal price,
         @NotBlank String city,
-        @NotNull Long categoryId,
-        @NotNull Long ownerId
+        @NotNull Long categoryId
         ){
 }
