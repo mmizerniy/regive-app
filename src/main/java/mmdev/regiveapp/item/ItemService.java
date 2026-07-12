@@ -4,14 +4,13 @@ import mmdev.regiveapp.category.Category;
 import mmdev.regiveapp.category.CategoryRepository;
 import mmdev.regiveapp.common.exception.ResourceNotFoundException;
 import mmdev.regiveapp.event.ItemCreatedEvent;
-import mmdev.regiveapp.event.ItemEventPublisher;
 import mmdev.regiveapp.item.dto.CreateItemRequest;
 import mmdev.regiveapp.item.dto.ItemResponse;
 import mmdev.regiveapp.item.dto.UpdateItemRequest;
+import mmdev.regiveapp.outbox.OutboxService;
 import mmdev.regiveapp.security.CurrentUserService;
 import mmdev.regiveapp.user.Role;
 import mmdev.regiveapp.user.User;
-import mmdev.regiveapp.user.UserRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.AccessDeniedException;
@@ -28,23 +27,20 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final CategoryRepository categoryRepository;
     private final CurrentUserService currentUserService;
-    private final ItemEventPublisher eventPublisher;
+    private final OutboxService outboxService;
 
-    public ItemService(ItemRepository itemRepository,
-                       CategoryRepository categoryRepository,
-                       CurrentUserService currentUserService,
-                       ItemEventPublisher eventPublisher) {
+    public ItemService(ItemRepository itemRepository, CategoryRepository categoryRepository, CurrentUserService currentUserService, OutboxService outboxService) {
         this.itemRepository = itemRepository;
         this.categoryRepository = categoryRepository;
         this.currentUserService = currentUserService;
-        this.eventPublisher = eventPublisher;
+        this.outboxService = outboxService;
     }
 
     @Transactional
-    public ItemResponse create(CreateItemRequest request){
+    public ItemResponse create(CreateItemRequest request) {
         User owner = currentUserService.getCurrentUser();
         Category category = categoryRepository.findById(request.categoryId())
-                .orElseThrow(()->new ResourceNotFoundException("Category not found: id="+request.categoryId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found: id=" + request.categoryId()));
 
         Item item = new Item();
         item.setTitle(request.title());
@@ -56,16 +52,13 @@ public class ItemService {
 
         Item saved = itemRepository.save(item);
 
-        eventPublisher.publishItemCreated(new ItemCreatedEvent(
-                saved.getId(),
-                saved.getTitle(),
-                saved.getCity(),
-                saved.getPrice(),
-                saved.getCategory().getId(),
-                saved.getCategory().getName(),
-                saved.getOwner().getId(),
-                Instant.now()
-        ));
+        ItemCreatedEvent event = new ItemCreatedEvent(
+                saved.getId(), saved.getTitle(), saved.getCity(), saved.getPrice(),
+                saved.getCategory().getId(), saved.getCategory().getName(),
+                saved.getOwner().getId(), Instant.now()
+        );
+
+        outboxService.save("Item",String.valueOf(saved.getId()),"ItemCreated",event);
         return toResponse(saved);
     }
 
@@ -74,13 +67,14 @@ public class ItemService {
                 .map(this::toResponse)
                 .toList();
     }
-    @Cacheable(cacheNames = "items",key = "#id")
+
+    @Cacheable(cacheNames = "items", key = "#id")
     public ItemResponse findById(Long id) {
         return toResponse(getItemOrThrow(id));
     }
 
     @Transactional
-    @CacheEvict(cacheNames = "items",key = "#id")
+    @CacheEvict(cacheNames = "items", key = "#id")
     public ItemResponse update(Long id, UpdateItemRequest request) {
         Item item = getItemOrThrow(id);
         assertCanModify(item);
@@ -96,7 +90,7 @@ public class ItemService {
     }
 
     @Transactional
-    @CacheEvict(cacheNames = "items",key = "#id")
+    @CacheEvict(cacheNames = "items", key = "#id")
     public ItemResponse claim(Long id) {
         Item item = getItemOrThrow(id);
         if (item.getStatus() != ItemStatus.ACTIVE) {
@@ -107,7 +101,7 @@ public class ItemService {
     }
 
     @Transactional
-    @CacheEvict(cacheNames = "items",key = "#id")
+    @CacheEvict(cacheNames = "items", key = "#id")
     public void delete(Long id) {
         itemRepository.delete(getItemOrThrow(id));
     }
@@ -125,11 +119,12 @@ public class ItemService {
                 i.getCategory().getId(), i.getCategory().getName(),
                 i.getCreatedAt());
     }
-    private void assertCanModify(Item item){
+
+    private void assertCanModify(Item item) {
         User current = currentUserService.getCurrentUser();
         boolean isOwner = item.getOwner().getId().equals(current.getId());
         boolean isModerator = current.getRole() == Role.MODERATOR;
-        if (!isOwner && !isModerator){
+        if (!isOwner && !isModerator) {
             throw new AccessDeniedException("You can modify only your own items");
         }
     }
