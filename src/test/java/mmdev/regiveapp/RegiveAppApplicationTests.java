@@ -3,8 +3,7 @@ package mmdev.regiveapp;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class RegiveAppApplicationTests {
+class RegiveAppApplicationTests extends AbstractIntegrationTest{
 
     @Test
     void contextLoads() {
