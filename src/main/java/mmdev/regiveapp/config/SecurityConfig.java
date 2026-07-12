@@ -42,6 +42,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/categories").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/categories").hasRole("MODERATOR")
                         .requestMatchers(HttpMethod.DELETE,"/api/categories/**").hasRole("MODERATOR")
+                        .requestMatchers("/actuator/health/**", "/actuator/prometheus").permitAll()
+                        .requestMatchers("/actuator/**").hasRole("MODERATOR")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex->ex.authenticationEntryPoint(authenticationEntryPoint))

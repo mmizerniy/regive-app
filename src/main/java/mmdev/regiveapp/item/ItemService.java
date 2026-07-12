@@ -19,9 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Instant;
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,12 +30,14 @@ public class ItemService {
     private final CategoryRepository categoryRepository;
     private final CurrentUserService currentUserService;
     private final OutboxService outboxService;
+    private final MeterRegistry meterRegistry;
 
-    public ItemService(ItemRepository itemRepository, CategoryRepository categoryRepository, CurrentUserService currentUserService, OutboxService outboxService) {
+    public ItemService(ItemRepository itemRepository, CategoryRepository categoryRepository, CurrentUserService currentUserService, OutboxService outboxService, MeterRegistry meterRegistry) {
         this.itemRepository = itemRepository;
         this.categoryRepository = categoryRepository;
         this.currentUserService = currentUserService;
         this.outboxService = outboxService;
+        this.meterRegistry = meterRegistry;
     }
 
     @Transactional
@@ -62,6 +63,10 @@ public class ItemService {
         );
 
         outboxService.save("Item",String.valueOf(saved.getId()),"ItemCreated",event);
+        meterRegistry.counter("regive.items.created",
+                "city",saved.getCity(),
+                "category",saved.getCategory().getName())
+                .increment();
         return toResponse(saved);
     }
 
@@ -100,6 +105,7 @@ public class ItemService {
             throw new IllegalStateException("Item is not available, current status: " + item.getStatus());
         }
         item.setStatus(ItemStatus.RESERVED);
+        meterRegistry.counter("regive.items.claimed").increment();
         return toResponse(item);
     }
 
