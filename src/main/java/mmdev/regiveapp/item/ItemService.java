@@ -10,6 +10,8 @@ import mmdev.regiveapp.security.CurrentUserService;
 import mmdev.regiveapp.user.Role;
 import mmdev.regiveapp.user.User;
 import mmdev.regiveapp.user.UserRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,12 +54,13 @@ public class ItemService {
                 .map(this::toResponse)
                 .toList();
     }
-
+    @Cacheable(cacheNames = "items",key = "#id")
     public ItemResponse findById(Long id) {
         return toResponse(getItemOrThrow(id));
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "items",key = "#id")
     public ItemResponse update(Long id, UpdateItemRequest request) {
         Item item = getItemOrThrow(id);
         assertCanModify(item);
@@ -73,6 +76,7 @@ public class ItemService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "items",key = "#id")
     public ItemResponse claim(Long id) {
         Item item = getItemOrThrow(id);
         if (item.getStatus() != ItemStatus.ACTIVE) {
@@ -83,6 +87,7 @@ public class ItemService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "items",key = "#id")
     public void delete(Long id) {
         itemRepository.delete(getItemOrThrow(id));
     }
