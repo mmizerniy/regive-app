@@ -132,11 +132,11 @@ The project grows one concern at a time:
 
 - [x] **1. CRUD core** — Spring Boot + Spring Data JPA + PostgreSQL, layered
   architecture, DTOs, validation, centralized error handling
-- [ ] **2. Testing** — JUnit 5 + Mockito unit tests for the service layer
-- [ ] **3. Migrations** — replace `ddl-auto` with Flyway
-- [ ] **4. Security** — Spring Security + JWT, registration/login, roles
-- [ ] **5. Caching** — Redis for hot endpoints
-- [ ] **6. Messaging** — Kafka: notify subscribers when a matching listing appears
+- [x] **2. Testing** — JUnit 5 + Mockito unit tests for the service layer
+- [x] **3. Migrations** — replace `ddl-auto` with Flyway
+- [x] **4. Security** — Spring Security + JWT, registration/login, roles
+- [x] **5. Caching** — Redis for hot endpoints
+- [x] **6. Messaging** — Kafka: notify subscribers when a matching listing appears
   (event-driven), with the Outbox pattern for consistency
 - [ ] **7. Integration testing** — Testcontainers (real PostgreSQL and Kafka)
 - [ ] **8. DevOps** — Docker, docker-compose, GitHub Actions CI
