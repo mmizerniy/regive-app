@@ -150,3 +150,10 @@ Some rough edges are **intentional** at this stage and are addressed in later ph
 the reservation endpoint has no race-condition protection yet (Redis distributed lock,
 phase 10), and the item search exhibits the classic N+1 query pattern
 (fixed and benchmarked in phase 10).
+
+## Performance
+
+The item search endpoint was profiled and optimized against a 50,000-row dataset:
+**217 ms → 18 ms**, **883 KB → 5.2 KB**, **~7,400 queries → 2**.
+
+See [PERFORMANCE.md](PERFORMANCE.md) for the full case study with `EXPLAIN ANALYZE` output.

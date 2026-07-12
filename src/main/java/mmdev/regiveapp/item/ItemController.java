@@ -1,9 +1,13 @@
 package mmdev.regiveapp.item;
 
 import jakarta.validation.Valid;
+import mmdev.regiveapp.common.dto.PageResponse;
 import mmdev.regiveapp.item.dto.CreateItemRequest;
 import mmdev.regiveapp.item.dto.ItemResponse;
 import mmdev.regiveapp.item.dto.UpdateItemRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,9 +31,11 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemResponse> search(@RequestParam(required = false) String city,
-                                     @RequestParam(required = false) Long categoryId) {
-        return itemService.search(city, categoryId);
+    public PageResponse<ItemResponse> search(@RequestParam(required = false) String city,
+                                             @RequestParam(required = false) Long categoryId,
+                                             @PageableDefault(size = 20,sort = "createdAt",direction = Sort.Direction.DESC)
+                                     Pageable pageable) {
+        return itemService.search(city, categoryId,pageable);
     }
 
     @GetMapping("/{id}")

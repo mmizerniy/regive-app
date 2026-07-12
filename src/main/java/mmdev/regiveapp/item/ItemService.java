@@ -2,6 +2,7 @@ package mmdev.regiveapp.item;
 
 import mmdev.regiveapp.category.Category;
 import mmdev.regiveapp.category.CategoryRepository;
+import mmdev.regiveapp.common.dto.PageResponse;
 import mmdev.regiveapp.common.exception.ResourceNotFoundException;
 import mmdev.regiveapp.event.ItemCreatedEvent;
 import mmdev.regiveapp.item.dto.CreateItemRequest;
@@ -13,6 +14,8 @@ import mmdev.regiveapp.user.Role;
 import mmdev.regiveapp.user.User;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,10 +65,10 @@ public class ItemService {
         return toResponse(saved);
     }
 
-    public List<ItemResponse> search(String city, Long categoryId) {
-        return itemRepository.search(city, categoryId).stream()
-                .map(this::toResponse)
-                .toList();
+    public PageResponse<ItemResponse> search(String city, Long categoryId, Pageable pageable) {
+        Page<ItemResponse> page =  itemRepository.search(city, categoryId,pageable)
+                .map(this::toResponse);
+        return PageResponse.from(page);
     }
 
     @Cacheable(cacheNames = "items", key = "#id")
