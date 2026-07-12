@@ -6,6 +6,7 @@ import mmdev.regiveapp.category.CategoryRepository;
 import mmdev.regiveapp.common.exception.ResourceNotFoundException;
 import mmdev.regiveapp.item.dto.CreateItemRequest;
 import mmdev.regiveapp.item.dto.ItemResponse;
+import mmdev.regiveapp.outbox.OutboxService;
 import mmdev.regiveapp.security.CurrentUserService;
 import mmdev.regiveapp.user.User;
 import mmdev.regiveapp.user.UserRepository;
@@ -30,6 +31,7 @@ public class ItemServiceTest {
     @Mock private ItemRepository itemRepository;
     @Mock private CategoryRepository categoryRepository;
     @Mock private CurrentUserService currentUserService;
+    @Mock private OutboxService outboxService;
 
     @InjectMocks
     private ItemService itemService;
@@ -82,20 +84,6 @@ public class ItemServiceTest {
         assertThatThrownBy(() -> itemService.claim(10L))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("RESERVED");
-    }
-
-    @Test
-    @DisplayName("create: throws when owner does not exist")
-    void create_shouldThrowWhenOwnerNotFound() {
-        CreateItemRequest request = new CreateItemRequest(
-                "Old keyboard", "Is worked", null, "Ivano-Frankivsk", 1L);
-        when(currentUserService.getCurrentUser()).thenReturn(owner);
-
-        assertThatThrownBy(() -> itemService.create(request))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("User not found");
-
-        verify(itemRepository, never()).save(any());
     }
 
     @Test

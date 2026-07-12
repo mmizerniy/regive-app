@@ -57,7 +57,6 @@ public class UserServiceTest {
     void create_shouldThrowOnDuplicateEmail(){
         CreateUserRequest request = new CreateUserRequest("Maks","maks@example.com","secret123");
         when(userRepository.existsByEmail("maks@example.com")).thenReturn(true);
-        when(passwordEncoder.encode("secret123")).thenReturn("$2a$10$hashed");
         assertThatThrownBy(()->userService.create(request))
                 .isInstanceOf(DuplicateResourceException.class)
                 .hasMessageContaining("maks@example.com");
