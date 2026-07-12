@@ -1,4 +1,5 @@
 # RegiveApp
+[![CI](https://github.com/mmizerniy/regive-app/actions/workflows/ci.yml/badge.svg)](https://github.com/mmizerniy/regive-app/actions/workflows/ci.yml)
 
 A platform for giving away or reselling unwanted items. A user posts a listing for
 something they no longer need (for free or for a price); others browse the feed,
@@ -70,42 +71,17 @@ erDiagram
 
 ## Getting started
 
-### Prerequisites
+Prerequisites: Docker and Docker Compose.
 
-- JDK 21
-- PostgreSQL running locally
-- (Maven is bundled via the wrapper — `./mvnw`)
-
-### 1. Create the database
+1. Copy `.env.example` to `.env` and set `JWT_SECRET` (generate with `openssl rand -base64 48`).
+2. Run the whole stack:
 
 ```bash
-psql -U postgres -c "CREATE DATABASE regiveapp;"
+   docker compose up --build
 ```
 
-### 2. Configure environment
-
-Copy the example file and fill in your local credentials:
-
-```bash
-cp .env.example .env
-```
-
-```dotenv
-DB_URL=jdbc:postgresql://localhost:5432/regiveapp
-DB_USERNAME=postgres
-DB_PASSWORD=your_password
-```
-
-`.env` is git-ignored and never committed.
-
-### 3. Run
-
-```bash
-./mvnw spring-boot:run
-```
-
-The API starts on `http://localhost:8080`. On first run, Hibernate creates the schema
-automatically (`ddl-auto=update`). This is replaced by Flyway migrations in a later phase.
+The API starts on `http://localhost:8080`. PostgreSQL, Redis, and Kafka are started
+automatically, and Flyway applies the schema on startup.
 
 ## API
 
