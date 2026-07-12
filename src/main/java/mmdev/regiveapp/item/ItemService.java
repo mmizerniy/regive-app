@@ -3,6 +3,8 @@ package mmdev.regiveapp.item;
 import mmdev.regiveapp.category.Category;
 import mmdev.regiveapp.category.CategoryRepository;
 import mmdev.regiveapp.common.exception.ResourceNotFoundException;
+import mmdev.regiveapp.event.ItemCreatedEvent;
+import mmdev.regiveapp.event.ItemEventPublisher;
 import mmdev.regiveapp.item.dto.CreateItemRequest;
 import mmdev.regiveapp.item.dto.ItemResponse;
 import mmdev.regiveapp.item.dto.UpdateItemRequest;
@@ -16,6 +18,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -25,11 +28,16 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final CategoryRepository categoryRepository;
     private final CurrentUserService currentUserService;
+    private final ItemEventPublisher eventPublisher;
 
-    public ItemService(ItemRepository itemRepository, CategoryRepository categoryRepository, CurrentUserService currentUserService) {
+    public ItemService(ItemRepository itemRepository,
+                       CategoryRepository categoryRepository,
+                       CurrentUserService currentUserService,
+                       ItemEventPublisher eventPublisher) {
         this.itemRepository = itemRepository;
         this.categoryRepository = categoryRepository;
         this.currentUserService = currentUserService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -46,7 +54,19 @@ public class ItemService {
         item.setOwner(owner);
         item.setCategory(category);
 
-        return toResponse(itemRepository.save(item));
+        Item saved = itemRepository.save(item);
+
+        eventPublisher.publishItemCreated(new ItemCreatedEvent(
+                saved.getId(),
+                saved.getTitle(),
+                saved.getCity(),
+                saved.getPrice(),
+                saved.getCategory().getId(),
+                saved.getCategory().getName(),
+                saved.getOwner().getId(),
+                Instant.now()
+        ));
+        return toResponse(saved);
     }
 
     public List<ItemResponse> search(String city, Long categoryId) {
