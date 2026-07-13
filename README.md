@@ -114,10 +114,10 @@ The project grows one concern at a time:
 - [x] **5. Caching** — Redis for hot endpoints
 - [x] **6. Messaging** — Kafka: notify subscribers when a matching listing appears
   (event-driven), with the Outbox pattern for consistency
-- [ ] **7. Integration testing** — Testcontainers (real PostgreSQL and Kafka)
-- [ ] **8. DevOps** — Docker, docker-compose, GitHub Actions CI
-- [ ] **9. Observability** — structured logging, Micrometer + Prometheus/Grafana
-- [ ] **10. Advanced** — concurrency-safe reservations (Redis distributed lock),
+- [x] **7. Integration testing** — Testcontainers (real PostgreSQL and Kafka)
+- [x] **8. DevOps** — Docker, docker-compose, GitHub Actions CI
+- [x] **9. Observability** — structured logging, Micrometer + Prometheus/Grafana
+- [x] **10. Advanced** — concurrency-safe reservations (Redis distributed lock),
   N+1 fixes, query optimization with `EXPLAIN ANALYZE`
 
 ## Notes
