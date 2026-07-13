@@ -1,20 +1,19 @@
 package mmdev.regiveapp.item;
 
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import mmdev.regiveapp.category.Category;
 import mmdev.regiveapp.category.CategoryRepository;
-import mmdev.regiveapp.common.exception.ResourceNotFoundException;
 import mmdev.regiveapp.item.dto.CreateItemRequest;
 import mmdev.regiveapp.item.dto.ItemResponse;
 import mmdev.regiveapp.outbox.OutboxService;
 import mmdev.regiveapp.security.CurrentUserService;
 import mmdev.regiveapp.user.User;
-import mmdev.regiveapp.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -32,8 +31,9 @@ public class ItemServiceTest {
     @Mock private CategoryRepository categoryRepository;
     @Mock private CurrentUserService currentUserService;
     @Mock private OutboxService outboxService;
+    @Mock private MeterRegistry meterRegistry;
 
-    @InjectMocks
+
     private ItemService itemService;
 
     private User owner;
@@ -50,6 +50,13 @@ public class ItemServiceTest {
         category = new Category();
         category.setId(1L);
         category.setName("Electronic");
+
+        itemService = new ItemService(
+                itemRepository,
+                categoryRepository,
+                currentUserService,
+                outboxService,
+                new SimpleMeterRegistry());
     }
 
     private Item activeItem(){
